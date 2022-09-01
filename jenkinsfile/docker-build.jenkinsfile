@@ -1,0 +1,40 @@
+pipeline{
+    agent any
+    environment{
+        currentDate = sh(returnStdout: true, script: 'date +%Y-%m-%d_%H-%M-%S').trim()
+    }
+    
+    stages{
+        stage("Checkout Environmental Variables."){
+            steps{
+                script{
+                    repoUrl = "git@github.com:leryn1122/overture.git";
+                    repoBranch = "nightly";
+                }
+            }
+        }
+        stage("Pull Souce Code"){
+            steps{
+                checkout([
+                    $class: "GitSCM",
+                    branches: [
+                        [name: "${repoBranch}"]
+                    ],
+                    extensions: [],
+                    userRemoteConfigs: [
+                        [
+                            url: "${repoUrl}"
+                        ]
+                    ]
+                ])
+            }
+        }
+    }
+
+    post{
+        success{
+        }
+        failure{
+        }
+    }
+}
