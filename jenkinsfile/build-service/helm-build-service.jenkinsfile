@@ -1,0 +1,55 @@
+pipeline{
+  environment {
+    PIPELINE_NAME = "${env.JOB_NAME}"
+    CHARTREPO_URL = "https://harbor.leryn.top/chartrepo/leryn"
+  }
+  stages{
+    stage("Preparation: Helm add repo") {
+      steps{
+        script {
+          withCredentials([usernamePassword(credentialsId: '==token==', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh "helm --version"
+            sh "helm add repo mychartrepo ${CHARTREPO_URL} --username=${USERNAME} --password=${PASSWORD} --insecure"
+            sh "helm repo update"
+          }
+        }
+      }
+    }
+    stage("Helm dry-run") {
+      steps{
+        script {
+          sh "helm dependency update"
+          sh "helm template demo . --debug -n demo"
+        }
+      }
+    }
+    stage("Helm chart build") {
+      steps{
+        script {
+          sh "helm package ."
+        }
+      }
+    }
+    stage("Helm push to repo") {
+      steps{
+        script {
+          withCredentials([usernamePassword(credentialsId: '==token==', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh "helm cm-push *.tgz mychartrepo --username=${USERNAME} --password=${PASSWORD} --insecure"
+            sh "rm *.tgz"
+          }
+        }
+      }
+    }
+  }
+  post{
+    always {
+      echo "🤖 Pipeline `${env.PIPELINE_NAME}` has been done ~~"
+    }
+    success {
+      echo "🎉 Pipeline `${env.PIPELINE_NAME}` passed successfully ~~"
+    }
+    failure {
+      echo "🌧️ Pipeline `${env.PIPELINE_NAME}` failed!!"
+    }
+  }
+}

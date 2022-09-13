@@ -1,60 +1,65 @@
 @Library('jenkins-shared-lib') _
 
 pipeline{
-    // agent any
-    // agent docker {
-    //     label 'docker'
-    //     image 'docker:dind'
-    //     args '-v /root/.npm:/root/.npm'
-    // }
-    agent any
+  agent any
+  // agent docker {
+  //     label 'docker'
+  //     image 'docker:dind'
+  //     args '-v /root/.npm:/root/.npm'
+  // }
+  agent any
 
-    environment{
-        currentDate = sh(returnStdout: true, script: 'date +%Y-%m-%d_%H-%M-%S').trim()
+  environment{
+    PIPELINE_NAME = "${env.JOB_NAME}"
+    currentDate = sh(returnStdout: true, script: 'date +%Y-%m-%d_%H-%M-%S').trim()
+  }
+
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    disableConcurrentBuilds()
+    timeout(time: 10, unit: 'MINUTES')
+    timestamps()
+  }
+
+  stages{
+    stage("Prepare Environmental Variables."){
+      steps{
+        script{
+          repoUrl = "https://github.com/leryn1122/overture.git";
+          repoBranch = "nightly";
+        }
+      }
     }
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        disableConcurrentBuilds()
-        timeout(time: 10, unit: 'MINUTES')
-        timestamps()
-    }
+    stage("Checkout Souce Code"){
+      steps{
+        checkout([
+          $class: "GitSCM",
+          branches: [
+            [ name: "${repoBranch}" ]
+          ],
+          extensions: [],
+          userRemoteConfigs: [
+            [ url: "${repoUrl}" ]
+          ]
+        ])
 
-    stages{
-        stage("Prepare Environmental Variables."){
-            steps{
-                script{
-                    repoUrl = "https://github.com/leryn1122/overture.git";
-                    repoBranch = "nightly";
-                }
-            }
+        script {
+          detection.detectProjectType()
         }
-        stage("Checkout Souce Code"){
-            steps{
-                checkout([
-                    $class: "GitSCM",
-                    branches: [
-                        [   
-                            name: "${repoBranch}"
-                        ]
-                    ],
-                    extensions: [],
-                    userRemoteConfigs: [
-                        [
-                            url: "${repoUrl}"
-                        ]
-                    ]
-                ])
-            }
-        }
+      }
     }
-    
-    post {
-        success {
-            echo "Success!!"
-        }
-        failure {
-            echo "Failed!!"
-        }
+  }
+  
+  post {
+    always {
+      echo "🤖 Pipeline `${PIPELINE_NAME}` has been done ~~"
     }
+    success {
+      echo "🎉 Pipeline `${PIPELINE_NAME}` passed successfully ~~"
+    }
+    failure {
+      echo "🌧️ Pipeline `${PIPELINE_NAME}` failed!!"
+    }
+  }
 }
