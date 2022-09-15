@@ -2,6 +2,21 @@
 
 ## TL;DR
 
+Jenkins Pipeline
+
+## Requisition
+
+### Develop
+
+- (Optional*) Preferred IDE (e.g. Jetbrains Intellij, VS Code)
+- (Optional*) Jenkins linter 'd better, provided by IDE plugins which connecting to remote Jenkins server. 
+
+### Runtime
+
+- A Jenkins runtime with pipeline API plugins. 
+
+## Usage
+
 Insprired from this picture:
 
 <details>
@@ -15,19 +30,16 @@ Insprired from this picture:
 </div>
 </details>
 
-## Requisition
-
-### Develop
-
-- Preferred IDE (e.g. Jetbrains Intellij, VS Code)
-- Jenkins linter 'd better, provided by IDE plugins which connecting to remote Jenkins server. 
-
-### Runtime
-
-- A Jenkins runtime with pipeline API plugins. 
-
 ## Related Efforts
 
 Jenkins shared lib comes from:
 
 - [Jenkins-shared-lib](https://github.com/leryn1122/jenkins-shared-lib)
+
+## Maintainers
+
+[@Leryn](https://github.com/leryn1122).
+
+## License
+
+[MIT](LICENSE) © Leryn
