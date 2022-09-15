@@ -2,12 +2,6 @@
 
 pipeline{
   agent any
-  // agent docker {
-  //     label 'docker'
-  //     image 'docker:dind'
-  //     args '-v /root/.npm:/root/.npm'
-  // }
-  agent any
 
   environment{
     PIPELINE_NAME = "${env.JOB_NAME}"
