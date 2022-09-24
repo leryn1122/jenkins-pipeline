@@ -1,90 +1,75 @@
-pipeline{
-  agent {
-    docker {
-      image "alpine/helm:3.9.4"
-      args "-v ~/.helm:/root/.helm -v ~/.config/helm:/root/.config/helm -v ~/.cache/helm:/root/.cache/helm"
-    }
-  }
+def label = "jenkins-agent"
 
-  environment {
-    PIPELINE_NAME = "${env.JOB_NAME}"
-    CHARTREPO_URL = "https://harbor.leryn.top/chartrepo/library"
-    HARBOR_CREDENTIAL_TOKEN = "8fb36847-0c65-435c-a118-c3059cca7d51"
-  }
+podTemplate(
+    // inheritFrom: 'jenkins-agent-with-docker',
+    label: label, cloud: 'kubernetes') {
+  node(label) {
 
-  stages{
-    stage("Checkout Souce Code"){
-      steps{
-        checkout([
-          $class: "GitSCM",
-          branches: [
-            [ name: "main" ]
-          ],
-          extensions: [],
-          userRemoteConfigs: [
-            [ url: "https://github.com/leryn1122/sample-helm-chart.git" ]
-          ]
-        ])
-        script {
-          def chart = readYaml file: "Chart.yaml"
-          env.chartType = chart.type
-        }
+      stage("Checkout Source Code"){
+          checkout([
+            $class: "GitSCM",
+            branches: [
+              [ name: "main" ]
+            ],
+            extensions: [],
+            userRemoteConfigs: [
+              [ url: "https://github.com/leryn1122/sample-helm-chart.git" ]
+            ]
+          ])
       }
-    }
+      stage("Preparation: Helm add repo") {
 
-    stage("Preparation: Helm add repo") {
-      steps{
-        script {
-          withCredentials([usernamePassword(credentialsId: "${HARBOR_CREDENTIAL_TOKEN}", passwordVariable: "PASSWORD", usernameVariable: "USERNAME")]) {
-            sh "helm --version"
-            sh "helm add repo mychartrepo ${CHARTREPO_URL} --username=${USERNAME} --password=${PASSWORD} --insecure"
-            sh "helm repo update"
+          script {
+              sh "env"
+              sh "docker context create \\
+                  --docker host=tcp://docker:2376 \\
+                  --docker ca=/certs/client/ca.pem \\
+                  --docker cert=/certs/client/cert.pem \\
+                  --docker key=/certs/client/key.pem \\
+                  dind"
+              sh "docker context use dind"
+              sh "mkdir -p ~/.config/helm ~/.cache/helm"
+              sh "alias helm='docker run --rm -it \\
+                    -v $HOME/.config/helm:/root/.config/helm \\
+                    -v $HOME/.cache/helm:/root/.cache/helm \\
+                    alpine/helm:3.9.4"
+
+            withCredentials([usernamePassword(credentialsId: '8fb36847-0c65-435c-a118-c3059cca7d51', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+              sh "helm --version"
+              sh "helm add repo mychartrepo ${CHARTREPO_URL} --username=${USERNAME} --password=${PASSWORD} --insecure"
+              sh "helm repo update"
+            }
           }
-        }
       }
-    }
-
-    stage("Helm dry-run for application type") {
-      steps{
-        when {
-          environment name: 'chartType', value: 'application'
-        }
-        script {
-          sh "helm dependency update"
-          sh "helm template demo . --debug -n demo"
-        }
-      }
-    }
-
-    stage("Helm chart build") {
-      steps{
-        script {
-          sh "helm package ."
-        }
-      }
-    }
-
-    stage("Helm push to repo") {
-      steps{
-        script {
-          withCredentials([usernamePassword(credentialsId: "${HARBOR_CREDENTIAL_TOKEN}", passwordVariable: "PASSWORD", usernameVariable: "USERNAME")]) {
-            sh "helm push *.tgz mychartrepo --username=${USERNAME} --password=${PASSWORD} --insecure"
-            sh "rm *.tgz"
+      stage("Helm dry-run") {
+          script {
+            sh "helm dependency update"
+            sh "helm template demo . --debug -n demo"
           }
-        }
       }
-    }
-  }
-
-  post{
-    always {
-      echo "🤖 Pipeline `${PIPELINE_NAME}` has been done ~~"
-    }
-    success {
-      echo "🎉 Pipeline `${PIPELINE_NAME}` passed successfully ~~"
-    }
-    failure {
-      echo "🌧️ Pipeline `${PIPELINE_NAME}` failed!!"
+      stage("Helm chart build") {
+          script {
+            sh "helm package ."
+          }
+      }
+      stage("Helm push to repo") {
+          script {
+            withCredentials([usernamePassword(credentialsId: '==token==', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+              sh "helm push *.tgz mychartrepo --username=${USERNAME} --password=${PASSWORD} --insecure"
+              sh "rm *.tgz"
+            }
+          }
+      }
+    post{
+      always {
+        echo "🤖 Pipeline `${env.PIPELINE_NAME}` has been done ~~"
+      }
+      success {
+        echo "🎉 Pipeline `${env.PIPELINE_NAME}` passed successfully ~~"
+      }
+      failure {
+        echo "🌧️ Pipeline `${env.PIPELINE_NAME}` failed!!"
+      }
     }
   }
 }

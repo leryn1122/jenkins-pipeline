@@ -1,4 +1,4 @@
 * text eol=lf
 
 *.jenkinsfile linguist-language=Groovy
-*.jenkis      linguist-language=Groovy
+*.jenkins     linguist-language=Groovy
