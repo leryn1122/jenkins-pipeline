@@ -1,6 +1,9 @@
 {{- include "api.rbac.serviceAccount" . }}
 
-{{- include "jenkins.statefulSet" . }}
+{{- include "jenkins.cm" . }}
 {{- include "jenkins.rbac" . }}
+{{- include "jenkins.statefulSet" . }}
+{{- include "jenkins.svc" . }}
 {{- include "dind.statefulSet" . }}
-
+{{- include "dind.sec" . }}
+{{- include "dind.svc" . }}

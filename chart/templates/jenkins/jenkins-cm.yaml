@@ -1,4 +1,4 @@
----
+{{- define "jenkins.cm" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -40,3 +40,5 @@ data:
     {{- range .Files.Lines "config/jcasc-default-config.yaml" }}
       {{- . | nindent 4 }}
     {{- end }}
+---
+{{- end }}

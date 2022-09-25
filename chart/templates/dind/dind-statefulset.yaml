@@ -26,7 +26,7 @@ spec:
           {{- include "charts.image.snippets" $component.image | nindent 10 }}
           ports:
             -
-              name: HTTP
+              name: http
               containerPort: 2376
               protocol: TCP
           securityContext:

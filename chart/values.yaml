@@ -94,6 +94,7 @@ config:
 secret:
 
 jenkins:
+  name: "jenkins"
   image:
     name: "jenkins/jenkins"
     tag: "2.365-jdk11"
@@ -109,6 +110,7 @@ jenkins:
       servicePort: 50000
 
 dind:
+  name: "dind"
   image:
     name: "docker"
     tag: "dind"
@@ -116,7 +118,7 @@ dind:
   replica: 1
   secrets: []
   ports:
-    - name: HTTP
+    - name: http
       port: 2376
       servicePort: 2376
   securityContext:

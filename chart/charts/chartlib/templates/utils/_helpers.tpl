@@ -51,9 +51,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "charts.component.labels" -}}
-"app.kubernetes.io/name": ""{{/*{{- include "charts.name" . }}*/}}
+"app.kubernetes.io/name": "kubeops"
 "app.kubernetes.io/component": "{{ .name }}"
-"app.kubernetes.io/instance": ""{{/*{{- include "charts.name" . }}-{{- .name }}"*/}}
+"app.kubernetes.io/instance": "kubeops-{{ .name }}"
 {{- end }}
 
 {{- define "charts.image.snippets" -}}

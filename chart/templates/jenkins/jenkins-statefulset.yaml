@@ -2,6 +2,7 @@
 {{- range $nodeName, $node := .Values }}
 {{- if eq $nodeName "jenkins" }}
 {{- $component := $node }}
+{{/*{{- $component := (include "utils.tplvalues.render" ( dict "value" $node "Context" $ "name" $nodeName)) }}*/}}
 {{- if eq ($component.controller | default "Deployment" ) "StatefulSet" }}
 ---
 apiVersion: apps/v1
@@ -26,7 +27,7 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
-      serviceAccountName: devops
+      serviceAccountName: kubeops
       initContainers:
         - name: init
           {{- include "charts.image.snippets" $component.image | nindent 10 }}

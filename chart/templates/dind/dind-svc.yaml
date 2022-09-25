@@ -1,4 +1,4 @@
----
+{{- define "dind.svc" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -36,3 +36,5 @@ spec:
     "app.kubernetes.io/name": kubeops
     "app.kubernetes.io/instance": kubeops-dind
   type: ClusterIP
+---
+{{- end }}

@@ -5,7 +5,7 @@ credentials:
           - usernamePassword:
               description: "Harbor"
               id: "8fb36847-0c65-435c-a118-c3059cca7d51"
-              password: "{AQAAABAAAAAQcoOVFOdH1bTdJv5mYVtf0XNpBF8v5VSRw3S1UKV5/Do=}"
+              password: "{AQAAABAAAAAQ5mCTebVxfW3GMwqTZQOFVS9/w4FwvULiJ8JjJUmeSfo=}"
               scope: GLOBAL
               username: "admin"
 jenkins:
@@ -17,10 +17,10 @@ jenkins:
     - kubernetes:
         containerCap: 10
         containerCapStr: "10"
-        jenkinsTunnel: "jenkins-agent.devops.svc.cluster.local:50000"
-        jenkinsUrl: "http://jenkins.devops.svc.cluster.local"
+        jenkinsTunnel: "jenkins-agent.kubeops.svc.cluster.local:50000"
+        jenkinsUrl: "http://jenkins.kubeops.svc.cluster.local"
         name: "kubernetes"
-        namespace: "devops"
+        namespace: "kubeops"
         podLabels:
           - key: "jenkins-agent"
             value: "true"
@@ -28,12 +28,10 @@ jenkins:
         skipTlsVerify: true
         templates:
           - containers:
-              - args: "99d"
-                command: "sleep"
-                envVars:
+              - envVars:
                   - envVar:
                       key: "JENKINS_URL"
-                      value: "http://jenkins.devops.svc.cluster.local:8080/"
+                      value: "http://jenkins.kubeops.svc.cluster.local/"
                 image: "harbor.leryn.top/infra/jenkins-agent-docker:4.10-3-jdk11"
                 livenessProbe:
                   failureThreshold: 0
@@ -41,7 +39,7 @@ jenkins:
                   periodSeconds: 0
                   successThreshold: 0
                   timeoutSeconds: 0
-                name: "docker"
+                name: "jnlp"
                 resourceLimitCpu: "1000m"
                 resourceLimitMemory: "1024Mi"
                 resourceRequestCpu: "50m"
@@ -53,13 +51,18 @@ jenkins:
             instanceCap: 0
             instanceCapStr: "0"
             label: "jenkins-agent"
-            name: "jenkins-agent"
-            namespace: "devops"
+            name: "docker"
+            namespace: "kubeops"
             nodeUsageMode: "NORMAL"
             podRetention: "never"
-            serviceAccount: "devops"
+            serviceAccount: "kubeops"
             slaveConnectTimeout: 100
             slaveConnectTimeoutStr: "100"
+            volumes:
+              - secretVolume:
+                  mountPath: "/certs/client"
+                  optional: false
+                  secretName: "dind-client-cert"
             yamlMergeStrategy: "override"
   crumbIssuer:
     standard:

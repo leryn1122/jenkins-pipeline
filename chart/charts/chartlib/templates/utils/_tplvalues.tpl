@@ -6,8 +6,8 @@ Usage:
 */}}
 {{- define "utils.tplvalues.render" -}}
   {{- if typeIs "string" .value }}
-    {{- tpl .value .context }}
+    {{- tpl .value .Context }}
   {{- else }}
-    {{- tpl (.value | toYaml) .context }}
+    {{- tpl (.value | toYaml) .Context }}
   {{- end }}
 {{- end -}}
