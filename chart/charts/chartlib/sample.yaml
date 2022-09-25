@@ -1,0 +1,158 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# Kubernetes version.
+kubeVersion: ""
+
+# Kubernetes cluster domain.
+clusterDomain: cluster.local
+
+# Common annotations marked on all the resources rendered through charts. It would be overwritten if extra annotations
+# are specified with the same key.
+# (*) Default: {}
+commonAnnotations: {}
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  # Annotations to add to the service account
+  annotations: {}
+
+exposure:
+  enabled: false
+  # Optional type to export the service.
+  # (*) Enum:
+  #   - ingress (*)
+  #   - clusterIP
+  #   - nodePort
+  #   - loadBalancer
+  type: nodePort
+  ingress:
+    # Omitted if null.
+    # (*) Recommend: "nginx"
+    class: "nginx"
+    # Hostname
+    # (*) Required
+    hostname: "api.domain.com"
+    # Ingress controller annotations
+    # (*) Default: {}
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+    # Enable TLS for the host at `exposure.ingress.hostname`.
+    # (*) Default: false
+    tls: false
+    # Enable self-signed TLS certificate if `exposure.ingress.tls` is enabled.
+    # (*) Default: false
+    selfSigned: false
+    # Secret:
+    # Custom TLS certificates as secrets.
+    # Secret must contain TLS key and certificate.
+    # (*) Default: []
+    secret: []
+  clusterIP:
+  # TODO
+  nodePort:
+  # TODO
+  loadBalancer:
+  # TODO
+
+externalURL: https://api.domain.com
+internalTLS: false
+
+ipFamily:
+  ipv4:
+    enabled: true
+  ipv6:
+    enabled: true
+
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    # TODO
+    backend:
+      existingClaim: ""
+      storageClass: ""
+      subPath: "."
+      accessMode: ReadWriteOnce
+      size: 1Gi
+      annotations: {}
+
+components:
+  jenkins:
+    image:
+      # (*) Required.
+      name: "harbor.leryn.top/infra/jenkins-docker:2.365-jdk11"
+      # (*) Default: "latest"
+      tag: "latest"
+    # (*) Default: []
+    secrets: []
+    # (*) Default: []
+    ports:
+      - # (*) Default: port-<port>
+        name: http
+        # Exposed container port.
+        port: 8080
+        # Exposed service port.
+        # (*) Default: 80
+        servicePort: 80
+        # Protocol for specified container port.
+        # (*) Default: TCP
+        # enum:
+        #   - TCP
+        #   - UDP
+        protocol: TCP
+      -
+        name:
+        port: 50000
+        servicePort: 50000
+
+middlewares:
+  redis:
+    enabled: false
+    # TODO
+  elasticsearch:
+    enabled: false
+    # TODO
+  kafka:
+    enabled: false
+    # TODO
+  mysql:
+    enabled: false
+    # TODO
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: api.domain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
