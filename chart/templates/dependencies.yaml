@@ -1,0 +1,6 @@
+{{- include "api.rbac.serviceAccount" . }}
+
+{{- include "jenkins.statefulSet" . }}
+{{- include "jenkins.rbac" . }}
+{{- include "dind.statefulSet" . }}
+

@@ -8,8 +8,8 @@ Jenkins Pipeline
 
 ### Develop
 
-- (Optional*) Preferred IDE (e.g. Jetbrains Intellij, VS Code)
-- (Optional*) Jenkins linter 'd better, provided by IDE plugins which connecting to remote Jenkins server. 
+- (*Optional**) Preferred IDE (e.g. Jetbrains Intellij, VS Code)
+- (*Optional**) Jenkins linter 'd better, provided by IDE plugins which connecting to remote Jenkins server. 
 
 ### Runtime
 

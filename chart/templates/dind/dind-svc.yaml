@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker
+  labels:
+    "app.kubernetes.io/component": dind
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/instance": kubeops-dind
+spec:
+  ports:
+    - name: http
+      port: 2376
+      targetPort: 2376
+  selector:
+    "app.kubernetes.io/component": dind
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/instance": kubeops-dind
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dind
+  labels:
+    "app.kubernetes.io/component": dind
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/instance": kubeops-dind
+spec:
+  ports:
+    - name: http
+      port: 2376
+      targetPort: 2376
+  selector:
+    "app.kubernetes.io/component": dind
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/instance": kubeops-dind
+  type: ClusterIP

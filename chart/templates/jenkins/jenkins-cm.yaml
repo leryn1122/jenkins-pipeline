@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins
+  labels:
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/component": jenkins
+data:
+  apply_config.sh: |-
+    {{- range .Files.Lines "config/apply_config.sh" }}
+      {{- . | nindent 4 }}
+    {{- end }}
+  plugins.txt: |-
+    {{- range .Files.Lines "config/plugins.txt" }}
+      {{- . | nindent 4 }}
+    {{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jenkins
+  labels:
+    "app.kubernetes.io/name": kubeops
+    "app.kubernetes.io/component": jenkins
+data:
+  jenkins-admin-password: "YWRtaW4="
+  jenkins-admin-user: "YWRtaW4="
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-jcasc-config
+  labels:
+    "app.kubernetes.io/component": jenkins
+    "app.kubernetes.io/name": kubeops
+    jenkins-jenkins-config: "true"
+data:
+  jcasc-default-config.yaml: |-
+    {{- range .Files.Lines "config/jcasc-default-config.yaml" }}
+      {{- . | nindent 4 }}
+    {{- end }}

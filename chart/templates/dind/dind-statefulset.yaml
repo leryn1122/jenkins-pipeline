@@ -1,0 +1,38 @@
+{{- define "dind.statefulSet" }}
+{{- range $nodeName, $node := .Values }}
+{{- if eq $nodeName "dind" }}
+{{- $component := $node }}
+{{- if eq ($component.controller | default "Deployment" ) "StatefulSet" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dind
+  labels:
+    {{- include "charts.component.labels" $component | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "charts.component.labels" $component | nindent 6 }}
+  serviceName: dind
+  template:
+    metadata:
+      labels:
+        {{- include "charts.component.labels" $component | nindent 8 }}
+    spec:
+      containers:
+        - name: dind
+          {{- include "charts.image.snippets" $component.image | nindent 10 }}
+          ports:
+            -
+              name: HTTP
+              containerPort: 2376
+              protocol: TCP
+          securityContext:
+            privileged: true
+---
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

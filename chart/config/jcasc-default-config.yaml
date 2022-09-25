@@ -1,0 +1,279 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              description: "Harbor"
+              id: "8fb36847-0c65-435c-a118-c3059cca7d51"
+              password: "{AQAAABAAAAAQcoOVFOdH1bTdJv5mYVtf0XNpBF8v5VSRw3S1UKV5/Do=}"
+              scope: GLOBAL
+              username: "admin"
+jenkins:
+  agentProtocols:
+    - "JNLP4-connect"
+    - "Ping"
+  authorizationStrategy: "loggedInUsersCanDoAnything"
+  clouds:
+    - kubernetes:
+        containerCap: 10
+        containerCapStr: "10"
+        jenkinsTunnel: "jenkins-agent.devops.svc.cluster.local:50000"
+        jenkinsUrl: "http://jenkins.devops.svc.cluster.local"
+        name: "kubernetes"
+        namespace: "devops"
+        podLabels:
+          - key: "jenkins-agent"
+            value: "true"
+        serverUrl: "https://kubernetes.default"
+        skipTlsVerify: true
+        templates:
+          - containers:
+              - args: "99d"
+                command: "sleep"
+                envVars:
+                  - envVar:
+                      key: "JENKINS_URL"
+                      value: "http://jenkins.devops.svc.cluster.local:8080/"
+                image: "harbor.leryn.top/infra/jenkins-agent-docker:4.10-3-jdk11"
+                livenessProbe:
+                  failureThreshold: 0
+                  initialDelaySeconds: 0
+                  periodSeconds: 0
+                  successThreshold: 0
+                  timeoutSeconds: 0
+                name: "docker"
+                resourceLimitCpu: "1000m"
+                resourceLimitMemory: "1024Mi"
+                resourceRequestCpu: "50m"
+                resourceRequestMemory: "128Mi"
+                runAsGroup: "1000"
+                runAsUser: "1000"
+                workingDir: "/home/jenkins/agent"
+            id: "c719c24775e06b33cfc531a2e8373a585c7f5851a2805384edb4608ab46777f6"
+            instanceCap: 0
+            instanceCapStr: "0"
+            label: "jenkins-agent"
+            name: "jenkins-agent"
+            namespace: "devops"
+            nodeUsageMode: "NORMAL"
+            podRetention: "never"
+            serviceAccount: "devops"
+            slaveConnectTimeout: 100
+            slaveConnectTimeoutStr: "100"
+            yamlMergeStrategy: "override"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+  disableRememberMe: false
+  disabledAdministrativeMonitors:
+    - "hudson.diagnosis.ReverseProxySetupMonitor"
+  labelAtoms:
+    - name: "built-in"
+    - name: "jenkins-agent"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 2
+  primaryView:
+    all:
+      description: "Jenkins Platform CI/CD"
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+        - id: "admin"
+          name: "admin"
+          properties:
+            - favoriting:
+                autofavoriteEnabled: true
+            - "favorite"
+            - "apiToken"
+            - mailer:
+                emailAddress: "admin"
+            - preferredProvider:
+                providerId: "default"
+            - timezone:
+                timeZoneName: "Asia/Shanghai"
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+      - id: "default"
+        url: "http://download.leryn.top/jenkins/default.json"
+  views:
+    - all:
+        description: "Jenkins Platform CI/CD"
+        name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy: "knownHostsFileVerificationStrategy"
+  sSHD:
+    port: -1
+unclassified:
+  ansiColorBuildWrapper:
+    colorMaps:
+      - black: "#000000"
+        blackB: "#4C4C4C"
+        blue: "#1E90FF"
+        blueB: "#4682B4"
+        cyan: "#00CDCD"
+        cyanB: "#00FFFF"
+        green: "#00CD00"
+        greenB: "#00FF00"
+        magenta: "#CD00CD"
+        magentaB: "#FF00FF"
+        name: "xterm"
+        red: "#CD0000"
+        redB: "#FF0000"
+        white: "#E5E5E5"
+        whiteB: "#FFFFFF"
+        yellow: "#CDCD00"
+        yellowB: "#FFFF00"
+      - black: "#000000"
+        blackB: "#555555"
+        blue: "#0000AA"
+        blueB: "#5555FF"
+        cyan: "#00AAAA"
+        cyanB: "#55FFFF"
+        defaultBackground: 0
+        defaultForeground: 7
+        green: "#00AA00"
+        greenB: "#55FF55"
+        magenta: "#AA00AA"
+        magentaB: "#FF55FF"
+        name: "vga"
+        red: "#AA0000"
+        redB: "#FF5555"
+        white: "#AAAAAA"
+        whiteB: "#FFFFFF"
+        yellow: "#AA5500"
+        yellowB: "#FFFF55"
+      - black: "black"
+        blackB: "black"
+        blue: "blue"
+        blueB: "blue"
+        cyan: "cyan"
+        cyanB: "cyan"
+        green: "green"
+        greenB: "green"
+        magenta: "magenta"
+        magentaB: "magenta"
+        name: "css"
+        red: "red"
+        redB: "red"
+        white: "white"
+        whiteB: "white"
+        yellow: "yellow"
+        yellowB: "yellow"
+      - black: "#2E3436"
+        blackB: "#2E3436"
+        blue: "#3465A4"
+        blueB: "#3465A4"
+        cyan: "#06989A"
+        cyanB: "#06989A"
+        defaultBackground: 0
+        defaultForeground: 7
+        green: "#4E9A06"
+        greenB: "#4E9A06"
+        magenta: "#75507B"
+        magentaB: "#75507B"
+        name: "gnome-terminal"
+        red: "#CC0000"
+        redB: "#CC0000"
+        white: "#D3D7CF"
+        whiteB: "#D3D7CF"
+        yellow: "#C4A000"
+        yellowB: "#C4A000"
+    globalColorMapName: "xterm"
+  bitbucketEndpointConfiguration:
+    endpoints:
+      - bitbucketCloudEndpoint:
+          enableCache: false
+          manageHooks: false
+          repositoriesCacheDuration: 0
+          teamCacheDuration: 0
+  buildDiscarders:
+    configuredBuildDiscarders:
+      - "jobBuildDiscarder"
+      - simpleBuildDiscarder:
+          discarder:
+            logRotator:
+              numToKeepStr: "10"
+  buildStepOperation:
+    enabled: false
+  buildUserVars:
+    allBuilds: false
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "http://jenkins:8080/github-webhook/"
+  gitSCM:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  globalLibraries:
+    libraries:
+      - defaultVersion: "master"
+        name: "jenkins-shared-lib"
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                id: "5844ccd2-4580-4e81-ba5b-f63533368fef"
+                remote: "https://github.com/leryn1122/jenkins-shared-lib.git"
+                traits:
+                  - "gitBranchDiscovery"
+  globalTimeOutConfiguration:
+    operations:
+      - "abortOperation"
+    overwriteable: false
+    strategy:
+      absoluteTimeOutStrategy:
+        timeoutMinutes: "3"
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "address not configured yet <nobody@nowhere>"
+    url: "https://jenkins.leryn.top/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  pollSCM:
+    pollingThreadCount: 10
+  timestamper:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+  whitelist:
+    enabled: false
+tool:
+  git:
+    installations:
+      - home: "git"
+        name: "Default"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"

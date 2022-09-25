@@ -322,3 +322,4 @@ $RECYCLE.BIN/
 !/bin
 
 chart/charts
+.*-charts.yaml

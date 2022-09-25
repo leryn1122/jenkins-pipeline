@@ -1,0 +1,210 @@
+{{- define "jenkins.statefulSet" }}
+{{- range $nodeName, $node := .Values }}
+{{- if eq $nodeName "jenkins" }}
+{{- $component := $node }}
+{{- if eq ($component.controller | default "Deployment" ) "StatefulSet" }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jenkins
+  labels:
+    {{- include "charts.component.labels" $component | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "charts.component.labels" $component | nindent 6 }}
+  serviceName: jenkins
+  template:
+    metadata:
+      labels:
+        {{- include "charts.component.labels" $component | nindent 8 }}
+      annotations:
+        checksum/config: 95a70ac39ac2b625e5c985086a62da9fcc47888ec929e328e37b2bb456c00d25
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      serviceAccountName: devops
+      initContainers:
+        - name: init
+          {{- include "charts.image.snippets" $component.image | nindent 10 }}
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          command:
+            - /bin/sh
+            - /var/jenkins_config/apply_config.sh
+          env:
+            - name: JENKINS_UC
+              value: http://download.leryn.top/jenkins/default.json
+          resources:
+            {{- if $component.resources }}
+            {{ $component.resources }}
+            {{- else }}
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            {{- end }}
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            - name: jenkins-config
+              mountPath: /var/jenkins_config
+            - name: jenkins-plugins
+              mountPath: /var/jenkins_plugins
+            - name: jenkins-plugins-share
+              mountPath: /usr/share/jenkins/ref/plugins/
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: jenkins
+          image: "{{ $component.image.name }}:{{ $component.image.tag }}"
+          imagePullPolicy: Always
+          args:
+            - "--httpPort=8080"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JENKINS_OPTS
+              value: ""
+            - name: JENKINS_SLAVE_AGENT_PORT
+              value: "50000"
+            - name: JAVA_OPTS
+              value: >-
+                -Dcasc.reload.token=$(POD_NAME)
+            # - name: JENKINS_OPTS
+            #   value: >-
+            #     --webroot=/var/jenkins_cache/war
+            - name: CASC_JENKINS_CONFIG
+              value: /var/jenkins_home/casc_configs
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: agent-listener
+              containerPort: 50000
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 12
+            httpGet:
+              path: "/login"
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: "/login"
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: "/login"
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            {{- if $component.resources }}
+            {{ $component.resources }}
+            {{- else }}
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            {{- end }}
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            - name: jenkins-config
+              mountPath: /var/jenkins_config
+            - name: jenkins-jcasc-config
+              mountPath: "/var/jenkins_home/casc_configs"
+            - name: jenkins-plugins
+              mountPath: /var/jenkins_plugins
+            - name: jenkins-plugins-share
+              mountPath: /usr/share/jenkins/ref/plugins/
+            - name: tmp
+              mountPath: /tmp
+        - name: config-reload
+          image: "kiwigrid/k8s-sidecar:1.15.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: LABEL
+              value: "jenkins-jenkins-config"
+            - name: FOLDER
+              value: "/var/jenkins_home/casc_configs"
+            - name: NAMESPACE
+              value: "jenkins"
+            - name: REQ_URL
+              value: "http://localhost:8080/reload-configuration-as-code/?casc-reload-token=$(POD_NAME)"
+            - name: REQ_METHOD
+              value: "POST"
+            - name: REQ_RETRY_CONNECT
+              value: "10"
+          resources:
+            {{- if $component.resources }}
+            {{ $component.resources }}
+            {{- else }}
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            {{- end }}
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            - name: jenkins-jcasc-config
+              mountPath: "/var/jenkins_home/casc_configs"
+      volumes:
+        - name: jenkins-config
+          configMap:
+            name: jenkins
+        - name: jenkins-jcasc-config
+          configMap:
+            name: jenkins-jcasc-config
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-home-pvc
+        - name: jenkins-secrets
+          projected:
+            sources:
+              - secret:
+                  name: jenkins
+                  items:
+                    - key: jenkins-admin-user
+                      path: jenkins-admin-user
+                    - key: jenkins-admin-password
+                      path: jenkins-admin-password
+        - name: jenkins-cache
+          emptyDir: {}
+        - name: jenkins-plugins
+          emptyDir: {}
+        - name: jenkins-plugins-share
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,123 @@
+nameOverride: ""
+fullnameOverride: ""
+
+# Kubernetes version.
+kubeVersion: ""
+
+# Kubernetes cluster domain.
+clusterDomain: cluster.local
+
+# Common annotations marked on all the resources rendered through charts. It would be overwritten if extra annotations
+# are specified with the same key.
+# (*) Default: {}
+commonAnnotations: {}
+
+serviceAccount:
+  create: true
+  name: "kubeops"
+  annotations: {}
+  labels: {}
+  imagePullSecretName: ""
+
+exposure:
+  enabled: false
+  type: "nodePort"
+  ingress:
+    class: "nginx"
+    hostname: "api.domain.com"
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: "true"
+      ingress.kubernetes.io/proxy-body-size: "0"
+    labels: {}
+    tls: false
+    selfSigned: false
+    secret: []
+  clusterIP:
+  # TODO
+  nodePort:
+    name:
+    ports:
+      http:
+        port: 80
+        nodePort: 30080
+      https:
+        port: 443
+        nodePort: 30443
+  loadBalancer:
+    name:
+    IP: ""
+    ports:
+      httpPort: 80
+      httpsPort: 443
+    annotations: {}
+
+externalURL: https://api.domain.com
+internalTLS:
+  enabled: false
+  certSource: "auto"
+  jenkins:
+    secretName: ""
+    crt: ""
+    key: ""
+  portal:
+    secretName: ""
+    crt: ""
+    key: ""
+
+ipFamily:
+  ipv4:
+    enabled: true
+  ipv6:
+    enabled: true
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    # TODO
+    backend:
+      existingClaim: ""
+      storageClass: ""
+      subPath: "."
+      accessMode: ReadWriteOnce
+      size: 1Gi
+      annotations: {}
+
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+
+updateStrategy:
+  type: RollingUpdate
+
+config:
+
+secret:
+
+jenkins:
+  image:
+    name: "jenkins/jenkins"
+    tag: "2.365-jdk11"
+  controller: StatefulSet
+  replica: 1
+  secrets: []
+  ports:
+    - name: http
+      port: 8080
+      servicePort: 80
+    - name:
+      port: 50000
+      servicePort: 50000
+
+dind:
+  image:
+    name: "docker"
+    tag: "dind"
+  controller: StatefulSet
+  replica: 1
+  secrets: []
+  ports:
+    - name: HTTP
+      port: 2376
+      servicePort: 2376
+  securityContext:
+    privileged: true
