@@ -153,7 +153,7 @@ spec:
             - name: FOLDER
               value: "/var/jenkins_home/casc_configs"
             - name: NAMESPACE
-              value: "jenkins"
+              value: "kubeops"
             - name: REQ_URL
               value: "http://localhost:8080/reload-configuration-as-code/?casc-reload-token=$(POD_NAME)"
             - name: REQ_METHOD
