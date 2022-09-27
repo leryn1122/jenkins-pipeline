@@ -1,0 +1,4 @@
+[submodule "jenkins-shared-lib"]
+	path = jenkins-shared-lib
+	url = https://github.com/leryn1122/jenkins-shared-lib
+	branch = master
