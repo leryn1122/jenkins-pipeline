@@ -13,7 +13,7 @@ jenkins:
     - "JNLP4-connect"
     - "Ping"
   authorizationStrategy: "loggedInUsersCanDoAnything"
-  clouds:
+  cloud:
     - kubernetes:
         containerCap: 10
         containerCapStr: "10"
@@ -28,35 +28,20 @@ jenkins:
         skipTlsVerify: true
         templates:
           - containers:
-              - envVars:
-                  - envVar:
-                      key: "JENKINS_URL"
-                      value: "http://jenkins.kubeops.svc.cluster.local/"
-                image: "harbor.leryn.top/infra/jenkins-agent-with-docker:4.11-1-slim-20.10.11"
-                name: "jnlp"
+              - command: "cat"
+                image: "harbor.leryn.top/infra/helm:3.10.0"
+                livenessProbe:
+                  failureThreshold: 0
+                  initialDelaySeconds: 0
+                  periodSeconds: 0
+                  successThreshold: 0
+                  timeoutSeconds: 0
+                name: "helm"
+                ttyEnabled: true
                 workingDir: "/home/jenkins/agent"
             id: "c719c24775e06b33cfc531a2e8373a585c7f5851a2805384edb4608ab46777f6"
             label: "jenkins-agent"
-            name: "docker"
-            namespace: "kubeops"
-            serviceAccount: "kubeops"
-            volumes:
-              - secretVolume:
-                  mountPath: "/certs/client"
-                  optional: false
-                  secretName: "dind-client-cert"
-            yamlMergeStrategy: "override"
-          - containers:
-              - envVars:
-                  - envVar:
-                      key: "JENKINS_URL"
-                      value: "http://jenkins.kubeops.svc.cluster.local/"
-                image: "harbor.leryn.top/infra/jenkins-agent-with-helm:4.11.1-debian-v3.9.4"
-                name: "jnlp"
-                workingDir: "/home/jenkins/agent"
-            id: "77809c2d-8850-4819-bcd8-f6f54813af5f"
-            label: "jenkins-agent"
-            name: "helm"
+            name: "jenkins-agent"
             namespace: "kubeops"
             serviceAccount: "kubeops"
             yamlMergeStrategy: "override"

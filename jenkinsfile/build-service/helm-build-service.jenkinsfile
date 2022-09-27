@@ -1,10 +1,24 @@
-def label = 'jenkins-agent'
+def chartrepoCredentialsId = "8fb36847-0c65-435c-a118-c3059cca7d51";
+def containerName = "helm";
 
-podTemplate(
-    inheritFrom: 'helm',
-    label: label, cloud: 'kubernetes') {
-  node(label) {
-    stage("Checkout Source Code"){
+podTemplate(inheritFrom: "jenkins-agent", cloud: "kubernetes") {
+
+  node(POD_LABEL) {
+    stage("Helm Add Repo") {
+      container(containerName) {
+        script {
+          withCredentials([usernamePassword(credentialsId: chartrepoCredentialsId, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh "helm version"
+            sh """
+                helm repo add devchartrepo https://harbor.leryn.top/chartrepo/library \
+                --username=${USERNAME} --password=${PASSWORD}
+            """
+            sh "helm repo update"
+          }
+        }
+      }
+    }
+    stage("Git Clone Project") {
       checkout([
         $class: "GitSCM",
         branches: [
@@ -16,30 +30,22 @@ podTemplate(
         ]
       ])
     }
-    stage("Preparation: Helm add repo") {
-      script {
-        withCredentials([usernamePassword(credentialsId: '8fb36847-0c65-435c-a118-c3059cca7d51', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-          sh "helm version"
-          sh "helm repo add mychartrepo https://harbor.leryn.top/chartrepo/library --username=${USERNAME} --password=${PASSWORD}"
-          sh "helm repo update"
-        }
-      }
-    }
-    stage("Helm dry-run") {
-      script {
+    stage("Helm Dry-run") {
+      container(containerName) {
         sh "helm dependency update"
-        sh "helm template sample . --debug -n sample"
+        sh "helm lint ."
+        sh "helm template sample . --debug -n sample 2>&1"
       }
     }
-    stage("Helm chart build") {
-      script {
+    stage("Helm Package") {
+      container(containerName) {
         sh "helm package ."
       }
     }
-    stage("Helm push to repo") {
-      script {
-        withCredentials([usernamePassword(credentialsId: '8fb36847-0c65-435c-a118-c3059cca7d51', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-          sh "helm cm-push *.tgz mychartrepo"
+    stage("Helm Push Remote") {
+      container(containerName) {
+        withCredentials([usernamePassword(credentialsId: chartrepoCredentialsId, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+          sh "helm cm-push *.tgz devchartrepo"
           sh "rm *.tgz"
         }
       }
