@@ -11,7 +11,7 @@ podTemplate(inheritFrom: "jenkins-agent", cloud: "kubernetes") {
             sh "helm version"
             sh """
                 helm repo add devchartrepo https://harbor.leryn.top/chartrepo/library \
-                --username=${USERNAME} --password=${PASSWORD}
+                  --username=${USERNAME} --password=${PASSWORD}
             """
             sh "helm repo update"
           }
@@ -34,7 +34,11 @@ podTemplate(inheritFrom: "jenkins-agent", cloud: "kubernetes") {
       container(containerName) {
         sh "helm dependency update"
         sh "helm lint ."
-        sh "helm template sample . --debug -n sample 2>&1"
+        // Skipped if the chart type is NOT `application`
+        def chart = readYaml file: "Chart.yaml"
+        if (chart.type == 'application') {
+            sh "helm template sample . --debug -n sample 2>&1"
+        }
       }
     }
     stage("Helm Package") {
