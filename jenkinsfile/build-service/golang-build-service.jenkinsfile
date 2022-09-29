@@ -1,0 +1,9 @@
+#!/usr/bin/env groovy
+
+// @Library('jenkins-shared-lib') _
+
+node {
+  stage("Build Project") {
+    echo "Invoke golang-build-service"
+  }
+}

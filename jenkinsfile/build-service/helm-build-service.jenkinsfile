@@ -1,9 +1,23 @@
+#!/usr/bin/env groovy
+
 def chartrepoCredentialsId = "8fb36847-0c65-435c-a118-c3059cca7d51";
 def containerName = "helm";
 
 podTemplate(inheritFrom: "jenkins-agent", cloud: "kubernetes") {
 
   node(POD_LABEL) {
+    stage("Git Clone Project") {
+      checkout([
+        $class: "GitSCM",
+        branches: [
+          [ name: "main" ]
+        ],
+        extensions: [],
+        userRemoteConfigs: [
+          [ url: "https://github.com/leryn1122/sample-helm-chart.git" ]
+        ]
+      ])
+    }
     stage("Helm Add Repo") {
       container(containerName) {
         script {
@@ -18,26 +32,14 @@ podTemplate(inheritFrom: "jenkins-agent", cloud: "kubernetes") {
         }
       }
     }
-    stage("Git Clone Project") {
-      checkout([
-        $class: "GitSCM",
-        branches: [
-          [ name: "main" ]
-        ],
-        extensions: [],
-        userRemoteConfigs: [
-          [ url: "https://github.com/leryn1122/sample-helm-chart.git" ]
-        ]
-      ])
-    }
     stage("Helm Dry-run") {
       container(containerName) {
         sh "helm dependency update"
         sh "helm lint ."
-        // Skipped if the chart type is NOT `application`
+        // Skipped if the chart type is NOT `application`.
         def chart = readYaml file: "Chart.yaml"
         if (chart.type == 'application') {
-            sh "helm template sample . --debug -n sample 2>&1"
+          sh "helm template sample . --debug -n sample 2>&1"
         }
       }
     }

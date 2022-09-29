@@ -17,7 +17,7 @@ Jenkins Pipeline
 
 ## Usage
 
-Insprired from this picture:
+Inspired from this picture:
 
 <details>
 <summary>See details</summary>
